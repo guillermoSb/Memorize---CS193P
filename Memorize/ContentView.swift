@@ -7,14 +7,17 @@
 
 import SwiftUI
 
+
 struct ContentView: View {
-  // Define el tipo con some - Significa que el tipo de esa variable es cualquier cosa siempre que sea un view.
-  // Esta variable no es guardada si no que se calcula cada vez que se llama la variable
+  var emojiMemoryGame: EmojiMemoryGame
   var body: some View {
-    // Esta en puntos
     HStack {
-      ForEach(0..<4) { index in
-        CardView(isFaceUp: false)
+      // Create a card view for each card on the model
+      ForEach(emojiMemoryGame.cards) { (card) in
+        CardView(content: card.content, font: emojiMemoryGame.cards.count < 5 ? .largeTitle : .title3)
+          .onTapGesture {
+            emojiMemoryGame.choose(card: card)  // Choose the card
+          }
       }
     }
     .padding()
@@ -24,21 +27,22 @@ struct ContentView: View {
 }
 
 
+/// Custom `CardView` is used for rendering cards. Needs to conform to the `View` protocol.
 struct CardView: View {
-  var isFaceUp: Bool
+  var isFaceUp: Bool = true
+  var content: String
+  var font: Font
   var body: some View {
     ZStack {
       if isFaceUp {
         RoundedRectangle(cornerRadius: 10.0).fill(Color.white)
         RoundedRectangle(cornerRadius: 10.0).stroke()
-        Text("👻")
+        Text("\(content)").font(font)
       } else {
-        // Fills using the foreground color on the Hstack
         RoundedRectangle(cornerRadius: 10.0).fill()
       }
-
-
     }
+    .aspectRatio(CGSize(width: 2, height: 3), contentMode: .fit)
   }
 }
 
@@ -90,6 +94,7 @@ struct CardView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        
+        ContentView(emojiMemoryGame: EmojiMemoryGame())
     }
 }

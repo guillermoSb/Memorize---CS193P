@@ -14,38 +14,25 @@ import Foundation
 class EmojiMemoryGame: ObservableObject {
   
   //MARK:  Properties
-  @Published private var memoryGame: MemoryGame = EmojiMemoryGame.createMemoryGame()
-  static var selectedTheme: ThemeLibrary.Theme = {
-    // Starts the new theme with a random one
-    let randomThemeIndex = Int.random(in: 0..<ThemeLibrary().themeCount)  // Picks a random theme index
-    return ThemeLibrary().themes[randomThemeIndex] // Sets the selected theme for all emojiMemoryGames
-  }()
-    
+  @Published private var memoryGame: MemoryGame<String>
+  var selectedTheme: Theme
+
+  init(selectedTheme: Theme) {
+    self.selectedTheme = selectedTheme
+    let emojiLibrary = selectedTheme.content
+    var memoryGame = MemoryGame(numberOfCardPairs: selectedTheme.pairs) { emojiLibrary[$0] }
+    memoryGame.shuffleCards()
+    self.memoryGame = memoryGame
+  }
   
   // Get the MemoryGame Cards
   var cards: Array<MemoryGame<String>.Card> {
     memoryGame.cards
+    
   }
   
   var score: Int {
     memoryGame.score
-  } 
-  
-  
-  
-  //MARK: Static methods
-  
-  
-  /// Creates a `MemoryGame` using an  `EmojiLibrary`
-  static func createMemoryGame() -> MemoryGame<String> {
-    var emojiLibrary = selectedTheme.content
-    // Shuffle the emoji library to obtain random cards
-    emojiLibrary.shuffle()
-    // Create a memory game and shuffle the cards
-    var memoryGame = MemoryGame(numberOfCardPairs: selectedTheme.content.count) { emojiLibrary[$0] }
-    memoryGame.shuffleCards()
-    // Set the memory game score to 0
-    return memoryGame
   }
   
   // MARK: User Intents
@@ -54,10 +41,13 @@ class EmojiMemoryGame: ObservableObject {
   }
   
   func newGame() {
-    // Select theme
-    let randomThemeIndex = Int.random(in: 0..<ThemeLibrary().themeCount)  // Picks a random theme index
-    EmojiMemoryGame.selectedTheme = ThemeLibrary().themes[randomThemeIndex] // Sets the selected theme for all emojiMemoryGames
-    self.memoryGame = EmojiMemoryGame.createMemoryGame()
+    self.memoryGame = createGame()
+  }
+  
+  
+  func createGame() -> MemoryGame<String> {
+    let emojiLibrary = selectedTheme.content
+    return MemoryGame(numberOfCardPairs: selectedTheme.pairs) {emojiLibrary[$0]}
   }
   
   

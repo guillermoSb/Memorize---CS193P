@@ -11,14 +11,18 @@ import SwiftUI
 struct EmojiMemoryGameView: View {
   @ObservedObject var emojiMemoryGame: EmojiMemoryGame
   
+  
+  init(theme: Theme) {
+    self.emojiMemoryGame = EmojiMemoryGame(selectedTheme: theme)
+  }
+  
   var body: some View {
     
-    NavigationView {
       VStack(content: {
-        Text("\(EmojiMemoryGame.selectedTheme.name)")
+        Text("\(emojiMemoryGame.selectedTheme.name)")
           .padding(.top, 20)
           .transition(.opacity)
-          .id("title" + EmojiMemoryGame.selectedTheme.name)
+          .id("title" + emojiMemoryGame.selectedTheme.name)
         Grid(emojiMemoryGame.cards) { (card) in
           CardView(card: card)
             .onTapGesture {
@@ -32,7 +36,7 @@ struct EmojiMemoryGameView: View {
           
         }
         .padding()
-        .foregroundColor(EmojiMemoryGame.selectedTheme.color)
+        .foregroundColor(emojiMemoryGame.selectedTheme.color)
         .navigationTitle("Score: \(emojiMemoryGame.score)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(content: {
@@ -40,14 +44,17 @@ struct EmojiMemoryGameView: View {
             Button("New Game") {
               withAnimation {
                 self.emojiMemoryGame.newGame()  // Create a New Game
-                print(EmojiMemoryGame.selectedTheme.json?.utf8)
               }
             }
           }
         })
       })
-    }
+    
     .navigationViewStyle(StackNavigationViewStyle())
+    // Always create a new game
+    .onAppear(perform: {
+      self.emojiMemoryGame.newGame()
+    })
     
     
   }
@@ -72,6 +79,7 @@ struct CardView: View {
     animatedBonusRemaining = card.bonusRemaining
     withAnimation(.linear(duration: card.bonusTimeRemaining)) {
       animatedBonusRemaining = 0
+      
     }
   }
   
@@ -164,11 +172,11 @@ struct ContentView_Previews: PreviewProvider {
   
   
   static var previews: some View {
-    let game = EmojiMemoryGame()
+    let game = EmojiMemoryGame(selectedTheme: Theme(name: "Halloween", content: ["👻", "🎃", "🕷", "🔥", "🤡", "👾", "👺", "🧟‍♀️", "🧞", "🐉"], rgb: UIColor.orange.rgb, pairs: 3))
     game.choose(game.cards[0])
     
     return Group {
-      EmojiMemoryGameView(emojiMemoryGame: game)
+      EmojiMemoryGameView(theme: Theme(name: "Halloween", content: ["👻", "🎃", "🕷", "🔥", "🤡", "👾", "👺", "🧟‍♀️", "🧞", "🐉"], rgb: UIColor.orange.rgb, pairs: 3))
     }
   }
 }

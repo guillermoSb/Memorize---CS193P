@@ -11,7 +11,8 @@ struct ThemeEditor: View {
   @EnvironmentObject var themeStore: ThemeStore
   @State var theme: Theme
   @State var emojiToAdd: String = ""
-  
+  @State var showEmojiAlert = false
+
   var body: some View {
     NavigationView {
       VStack {
@@ -33,12 +34,75 @@ struct ThemeEditor: View {
             
           }
           
+          
+          Section(header: Text("Theme Emoji")) {
+            Text("Tap Emoji to remove")
+            ScrollView(/*@START_MENU_TOKEN@*/.vertical/*@END_MENU_TOKEN@*/, showsIndicators: false) {
+              LazyVGrid(columns: [GridItem(.adaptive(minimum: gridItemSize))], content: {
+                ForEach(theme.content, id: \.self) { emoji in
+                  Text(emoji)
+                    .font(.system(size: emojiFont))
+                    .padding()
+                    .onTapGesture {
+                      // Remove emoji from the theme
+                      if let index = theme.content.firstIndex(of: emoji) {
+                        if theme.content.count > 2 {
+                          withAnimation {
+                            theme.content.remove(at: index)
+                            // Set the pairs
+                            theme.pairs = min(theme.pairs, theme.content.count)
+                            // Save the theme
+                            themeStore.save(theme: theme)
+                          }
+                        } else {
+                          showEmojiAlert = true
+                        }
+                        
+                      }
+                    }
+                }
+              })
+            }
+            .padding()
+            .frame(minHeight: gridSize)
+            Text("Add Emoji")
+     
+            TextField("Type Emoji", text: $emojiToAdd) { began in
+              if !began {
+
+                var newEmoji = theme.content
+                //  Create array of emojis
+                let emojis = Array(emojiToAdd)
+                
+               newEmoji.append(contentsOf: emojis.map({ character in
+                  String(character)
+                }))
+                // Filter emojis
+                var set = Set<String>()
+                newEmoji = newEmoji.filter { character in
+                  return set.insert(character).inserted
+                }
+                theme.content = newEmoji
+                
+                themeStore.save(theme: theme)
+                emojiToAdd = ""
+      
+              }
+            }
+          }
+          .alert(isPresented: $showEmojiAlert, content: {
+            Alert(title: Text("Can't delete Emoji"), message: Text("Your theme must have at least two Emoji."), dismissButton: .default(Text("OK")))
+          })
+          
         }
       }
       .navigationTitle(Text("Edit Theme"))
     }
     
   }
+  private let emojiFont: CGFloat = 50.0
+  private let gridSize: CGFloat = 300.0
+  private let gridItemSize: CGFloat = 80.0
 }
 
 struct ThemeColorPicker: View {

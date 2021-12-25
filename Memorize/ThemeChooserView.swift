@@ -31,13 +31,17 @@ struct ThemeChooserView: View {
           }
         })
       }
+      .listStyle(PlainListStyle())
       
       .navigationBarTitle("Themes")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: {
         ToolbarItem(placement: ToolbarItemPlacement.navigationBarTrailing) {
           Button(action: {
-            themeStore.addTheme()
+            withAnimation {
+              themeStore.addTheme()
+
+            }
           }, label: {
             Image(systemName: "plus").imageScale(.large)
           })

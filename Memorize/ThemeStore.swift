@@ -38,7 +38,9 @@ class ThemeStore: ObservableObject {
   // MARK: - INTENTS
   
   func addTheme() {
-    themes.append(ThemeStore.defaultTheme);
+    var theme = ThemeStore.defaultTheme
+    theme.id = UUID()
+    themes.append(theme);
   }
   func removeTheme(at index: Int) {
     themes.remove(at: index)

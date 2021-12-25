@@ -39,6 +39,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
       cards.append(Card(content: content))
       cards.append(Card(content: content))
     }
+    cards.shuffle()
     // Set the score to 0
     self.score = 0
   }
